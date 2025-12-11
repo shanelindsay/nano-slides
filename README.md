@@ -10,14 +10,6 @@ Original write-up for reference:
 *   [中文版 (Chinese)](https://yage.ai/nano-banana-pro.html)
 *   [English Version](https://yage.ai/nano-banana-pro-en.html)
 
-## The Generative Kernel Philosophy
-
-This project implements the **Generative Kernel** philosophy: instead of manually assembling slides, we inject raw assets and prompts into a generative model to render the final presentation layer.
-
-*   **Beyond DRY**: Don't just repeat yourself; generate yourself.
-*   **Asset Injection**: The core technique. We take raw functional assets (QR codes, logos, diagrams) and "inject" them into the generative process. The model renders the lighting, texture, and environment *around* the asset, creating a seamless organic integration.
-*   **The Glass Garden**: Our visual language. Translucent interfaces, matte ceramic accents, and soft, diffused lighting.
-
 ## What’s different in this fork
 - Styles live in `styles/` (clean_keynote, modern_academic, chalkboard, whiteboard_workshop, data_conference, editorial_magazine, glass_garden); choose with `--style` or point to a custom file.
 - Outlines are YAML files (`slides.yaml` by default, or pass `--yaml`), with per-slide `type`, PowerPoint-like `layout`, `generate`, `title/subtitle`, `text` (bullets or columns), `visual`, `assets`, `style_ref`, `notes`, `image_only`. See `outlines/sample_talk_outline.md` or `slides.yaml`.
@@ -84,10 +76,13 @@ Add your assets (e.g., `imgs/style_anchor_glass_garden_0.jpg` or `imgs/style_mat
 
 ## Style preview
 
-See `imgs/style_grid_reference_0.jpg` for a 4x2 grid illustrating the styles (Clean Keynote, Modern Academic, Chalkboard, Whiteboard Workshop, Data Conference, Editorial Magazine, Glass Garden, Default). Generate your own by:
-```bash
-python tools/gemini_generate_image.py --prompt "<grid prompt>" --output imgs/style_grid_reference --size 1K --aspect-ratio 16:9
-```
+See `imgs/style_grid_reference_v2_0.jpg` for a 2x4 grid illustrating several styles 
+(Minimal Monochrome, Dark Terminal, Research Poster, Notebook Paper, Sticky Note Workshop, 
+Systems Blueprint, Modern Academic, Chalkboard).
+
+Sample reference slides (usable as style anchors):
+- Modern Academic: `imgs/style_ref_modern_academic_0.jpg`
+- Dark Terminal: `imgs/style_ref_dark_terminal_0.jpg`
 
 ### 3. Refine & Upscale (Production Mode)
 Once specific slides are approved, upscale them to 4K resolution using the generative upscaler.
