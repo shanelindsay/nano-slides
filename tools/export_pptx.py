@@ -3,6 +3,12 @@ import sys
 import re
 from pathlib import Path
 
+# Ensure project root is on sys.path for imports
+script_dir = Path(__file__).resolve().parent
+project_root = script_dir.parent
+if str(project_root) not in sys.path:
+    sys.path.append(str(project_root))
+
 from pptx import Presentation
 from pptx.util import Inches
 
@@ -105,9 +111,6 @@ def main():
     parser.add_argument("--yaml", help="Path to YAML outline for speaker notes (optional)")
     parser.add_argument("--use-4k", action="store_true", help="Prefer 4K images if available")
     args = parser.parse_args()
-
-    script_dir = Path(__file__).parent
-    project_root = script_dir.parent
 
     run_dir = Path(args.run_dir)
     if not run_dir.is_absolute():
