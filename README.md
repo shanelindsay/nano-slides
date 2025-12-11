@@ -113,6 +113,23 @@ This is a simple viewer that lists each slide image in order.
 
 The root `index.html` in this repo is a Reveal.js talk about the project itself; it is not automatically updated for each generation run.
 
+## Export to PowerPoint (image-only)
+Wrap a run’s images into a PPTX (each image is a full-screen slide; notes come from your YAML).
+```bash
+# 1) Generate slides as images
+python tools/generate_slides.py --yaml slides.yaml --style modern_academic
+
+# 2) Upscale if you want 4K (optional)
+python tools/generate_slides.py --enlarge --run-dir slides/20250101_120000
+
+# 3) Export to PPTX (uses run images; attaches notes from YAML if provided)
+python tools/export_pptx.py \
+  --run-dir generated_slides/slides/20250101_120000 \
+  --yaml slides.yaml \
+  --use-4k \
+  --output pptx/slides_modern_academic.pptx
+```
+
 ## Setup
 
 1.  **Environment**:
