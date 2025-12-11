@@ -1,0 +1,111 @@
+---
+slide: 1
+type: title
+layout: title_slide
+style: glass_garden:title
+generate: true
+
+title: Nano Banana Pro Slide Deck Generator
+subtitle: Holistic slide rendering with Gemini
+
+text:
+  bullets: []
+
+visual: |
+  Cinematic Glass Garden hero slide: a glowing frosted-glass banana at the center,
+  with subtle UI cards floating around it. Strong central title, soft off-white
+  background, premium calm vibe.
+
+assets:
+  - imgs/style_anchor_glass_garden_0.jpg
+
+notes: |
+  Introduce the idea: this repo turns outlines and style rules into fully
+  rendered slide images using Gemini 3 Pro Image Preview.
+---
+slide: 2
+type: content
+layout: two_content
+style: glass_garden:default
+generate: true
+
+title: From assembling to rendering
+
+text:
+  columns:
+    - heading: Old workflow
+      bullets:
+        - Build slides directly in PowerPoint/Keynote
+        - Drag boxes, icons, screenshots by hand
+        - Visual style drifts slide to slide
+    - heading: Generative Kernel workflow
+      bullets:
+        - Define visual language once (styles/)
+        - Describe each slide in YAML
+        - Batch render slides with Gemini
+
+visual: |
+  Two-column scene: left shows a messy collage of flat icons/boxes; right shows
+  a clean Glass Garden workbench with elegant frosted-glass UI cards, representing
+  the rendered pipeline. Emphasize contrast: chaos -> order.
+
+assets:
+  - imgs/style_anchor_glass_garden_0.jpg
+
+notes: |
+  Core philosophy: treat the deck as a rendered artifact, not hand-assembled shapes.
+---
+slide: 3
+type: content
+layout: picture_with_caption
+style: glass_garden:default
+generate: true
+
+title: How the repo works
+
+text:
+  bullets:
+    - Style: styles/glass_garden.md (or your pack)
+    - Outline: YAML slides with text + visual hints + assets
+    - Engine: Python tools calling Gemini image preview
+    - Output: generated_slides/ + Reveal.js viewer
+
+visual: |
+  Schematic: on the left, three floating glass cards labeled "Style", "Outline",
+  and "Engine" feed into a glowing prism. On the right, finished slide tiles emerge
+  in a neat grid (the images in generated_slides/).
+
+assets:
+  - imgs/style_anchor_glass_garden_0.jpg
+
+notes: |
+  Walk through key files: styles/..., slides.yaml, tools/generate_slides.py,
+  tools/gemini_generate_image.py, index.html.
+---
+slide: 4
+type: content
+layout: title_and_content
+style: glass_garden:default
+generate: true
+
+title: "Your fork: outline + styles"
+subtitle: Controlled creativity
+
+text:
+  bullets:
+    - Write your talk as YAML slides with titles, bullets, visuals
+    - Swap style packs by changing style (e.g., glass_garden:default)
+    - Let Gemini handle composition/lighting
+    - Iterate with 1K drafts, then upscale to 4K
+
+visual: |
+  Glass Garden dashboard showing style chips (Glass, Chalkboard, Minimal Academic)
+  and a stack of outline cards. A beam of light connects them to a row of finished
+  slide images, implying outlines + style pack generate many decks.
+
+assets:
+  - imgs/style_anchor_glass_garden_0.jpg
+
+notes: |
+  Emphasize deliberate outlines + style packs; the model renders the scenes.
+---
