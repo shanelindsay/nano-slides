@@ -30,6 +30,30 @@ def load_style(style_name: str, project_root: Path) -> str:
 
     raise FileNotFoundError(f"Style '{style_name}' not found at {named_style}")
 
+def find_style_reference(base_style: str, project_root: Path):
+    """
+    Find a default style reference image for the given base style.
+    Looks for imgs/style_ref_<base_style>*.{jpg,png,jpeg,webp} or style_anchor/style_matrix variants for glass_garden.
+    Returns a Path or None.
+    """
+    imgs_dir = project_root / "imgs"
+    exts = ["jpg", "jpeg", "png", "webp"]
+    candidates = []
+    for ext in exts:
+        candidates.append(imgs_dir / f"style_ref_{base_style}_0.{ext}")
+        candidates.append(imgs_dir / f"style_ref_{base_style}.{ext}")
+    if base_style == "glass_garden":
+        for name in ["style_anchor_glass_garden_0", "style_matrix_glass_garden_0", "style_matrix_glass_garden"]:
+            for ext in exts:
+                candidates.append(imgs_dir / f"{name}.{ext}")
+    if base_style == "modern_academic":
+        for name in ["style_matrix_modern_academic_0", "style_matrix_modern_academic"]:
+            for ext in exts:
+                candidates.append(imgs_dir / f"{name}.{ext}")
+    for path in candidates:
+        if path.exists():
+            return path
+    return None
 
 def _format_text_block(text_field) -> str:
     """
@@ -234,21 +258,28 @@ def generate_slide(slide, style_text, default_style_ref, output_dir, project_roo
     prompt_parts.append("\nFULL SLIDE BLOCK (for reference):")
     prompt_parts.append(slide['content'])
 
-    if slide.get("style_refs"):
-        prompt_parts.append("\nSTYLE REFERENCES: Use these as visual anchors for color/typography/layout. Maintain consistency with them.")
-        prompt_parts.append(", ".join([Path(ref).name for ref in slide["style_refs"]]))
-
     prompt_parts.append(
         "\nTASK:\nGenerate a high-resolution, 16:9 slide image that reflects the outline while strictly following the style and layout guidance above.\nIf reference assets are provided, incorporate them naturally into the design."
     )
 
     prompt = "\n".join(prompt_parts)
 
+    # Build list of style refs (explicit + auto) and assets
+    style_refs = list(slide.get("style_refs") or [])
+    auto_ref = find_style_reference(base_style, project_root)
+    if auto_ref:
+        auto_ref_str = str(auto_ref)
+        if auto_ref_str not in style_refs:
+            style_refs.append(auto_ref_str)
+
+    if style_refs:
+        prompt_parts.append("\nSTYLE REFERENCES: Use these as visual anchors for color/typography/layout. Maintain consistency with them.")
+        prompt_parts.append(", ".join([Path(ref).name for ref in style_refs]))
+
     image_inputs = []
-    # Combine style refs and assets, style refs first
     combined_inputs = []
-    if slide.get('style_refs'):
-        combined_inputs.extend(slide['style_refs'])
+    if style_refs:
+        combined_inputs.extend(style_refs)
     if slide.get('asset_paths'):
         combined_inputs.extend(slide['asset_paths'])
 

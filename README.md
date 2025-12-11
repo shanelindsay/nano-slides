@@ -76,9 +76,9 @@ Add your assets (e.g., `imgs/style_anchor_glass_garden_0.jpg` or `imgs/style_mat
 
 ## Style preview
 
-See `imgs/style_grid_reference_v2_0.jpg` for a 2x4 grid illustrating several styles 
-(Minimal Monochrome, Dark Terminal, Research Poster, Notebook Paper, Sticky Note Workshop, 
-Systems Blueprint, Modern Academic, Chalkboard).
+See `imgs/style_grid_reference_v3_0.jpg` for a 2x4 grid illustrating styles 
+(Cinematic Darkroom, Research Notebook, Playful Infographic, Minimal Grid, 
+Minimal Monochrome, Dark Terminal, Research Poster, Sticky Note Workshop).
 
 Sample reference slides (usable as style anchors):
 - Modern Academic: `imgs/style_ref_modern_academic_0.jpg`
@@ -140,7 +140,7 @@ python tools/export_pptx.py \
 ## Project Structure
 
 *   `outlines/`: Outline files (sample: `outlines/sample_talk_outline.md`).
-*   `styles/`: Style packs (clean_keynote, modern_academic, chalkboard, whiteboard_workshop, data_conference, editorial_magazine, glass_garden).
+*   `styles/`: Style packs (clean_keynote, modern_academic, chalkboard, whiteboard_workshop, data_conference, editorial_magazine, glass_garden, minimal_monochrome, dark_terminal, research_poster, notebook_paper, sticky_note_workshop, systems_blueprint, cinematic_darkroom, research_notebook, playful_infographic, minimal_grid).
 *   `prompts/outline_generator.md`: Prompt for an LLM to emit outlines in the YAML format.
 *   `AGENTS.md`: Quick guide for agents using this repo.
 *   `speak_notes.md`: The script for the presentation.
