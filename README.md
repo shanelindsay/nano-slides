@@ -1,12 +1,12 @@
 # Nano Banana Pro Slide Deck Generator (Fork)
 
-This fork is a straight, controllable slide renderer:
+This fork is a controllable slide renderer:
 - You write the outline in Markdown.
 - You pick a style pack from `styles/`.
 - You can add per-slide style/layout hints.
 - Gemini 3 Pro Image Preview renders the slides.
 
-Original write-up for reference (style inspiration only):
+Original write-up for reference:
 *   [中文版 (Chinese)](https://yage.ai/nano-banana-pro.html)
 *   [English Version](https://yage.ai/nano-banana-pro-en.html)
 
@@ -22,7 +22,7 @@ This project implements the **Generative Kernel** philosophy: instead of manuall
 - Styles live in `styles/` (clean_keynote, modern_academic, chalkboard, whiteboard_workshop, data_conference, editorial_magazine, glass_garden); choose with `--style` or point to a custom file.
 - Outlines are YAML files (`slides.yaml` by default, or pass `--yaml`), with per-slide `type`, PowerPoint-like `layout`, `generate`, `title/subtitle`, `text` (bullets or columns), `visual`, `assets`, `style_ref`, `notes`, `image_only`. See `outlines/sample_talk_outline.md` or `slides.yaml`.
 - Prompts are composed from the style pack + layout/type hints + your outline text. No automatic summarization or planning.
-- Outputs stay simple: 1K previews, optional 4K upscale, view in `index.html`.
+
 
 ## Workflow (current fork)
 
@@ -67,8 +67,6 @@ notes: Optional speaker notes
 image_only: false                    # optional; set true to minimize rendered text
 ---
 ```
-
-The old `#### Slide N:` format is no longer supported; use the YAML block format.
 
 ### 2. Generate (Draft Mode)
 Run the generator to create 1K previews. This is fast and cheap for iteration.
