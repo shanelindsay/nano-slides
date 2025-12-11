@@ -119,7 +119,7 @@ To review a generated deck, open the `index.html` inside the run directory, for 
 
 `generated_slides/slides/20250101_120000/index.html`
 
-This is a simple viewer that lists each slide image in order.
+This is a simple viewer that lists each slide image in order. A chalkboard demo run is mirrored in `demo/chalkboard/` for reference.
 
 The root `index.html` in this repo is a Reveal.js talk about the project itself; it is not automatically updated for each generation run.
 
