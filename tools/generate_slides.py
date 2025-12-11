@@ -285,39 +285,56 @@ def main():
     parser = argparse.ArgumentParser(description="Generate slides")
     parser.add_argument("--enlarge", action="store_true", help="Enlarge existing slides to 4K")
     parser.add_argument("--slides", type=int, nargs="+", help="Specific slide numbers to process (e.g., --slides 8 11)")
-    parser.add_argument("--yaml", type=str, default=None, help="Path to YAML slides file (default: outlines/sample_slides.yaml)")
-    parser.add_argument("--run-dir", type=str, default=None, help="Output subdirectory under generated_slides/ (required for --enlarge; ignored for generation).")
+    parser.add_argument("--yaml", type=str, default=None, help="Path to YAML slides file (default: slides.yaml, else fall back to outlines/sample_slides.yaml)")
+    parser.add_argument("--run-dir", type=str, default=None, help="Output subdirectory under generated_slides/ (for --enlarge).")
     parser.add_argument("--style", type=str, default="glass_garden", help="Style name (styles/<name>.md) or path to style file")
     args = parser.parse_args()
 
     script_dir = Path(__file__).parent
     project_root = script_dir.parent
 
-    default_yaml = project_root / "outlines" / "sample_slides.yaml"
-    outline_path = Path(args.yaml) if args.yaml else default_yaml
+    # Prefer slides.yaml in repo root; fall back to sample if missing
+    root_yaml = project_root / "slides.yaml"
+    sample_yaml = project_root / "outlines" / "sample_slides.yaml"
+    if args.yaml:
+        outline_path = Path(args.yaml)
+    elif root_yaml.exists():
+        outline_path = root_yaml
+    else:
+        outline_path = sample_yaml
     base_output = project_root / "generated_slides"
 
     if args.enlarge:
         import glob
         import subprocess
-        if not args.run_dir:
-            print("Error: --run-dir is required when using --enlarge.", file=sys.stderr)
-            sys.exit(1)
-        output_dir = Path(args.run_dir)
-        if not output_dir.is_absolute():
-            output_dir = base_output / args.run_dir
+        if args.run_dir:
+            output_dir = Path(args.run_dir)
+            if not output_dir.is_absolute():
+                output_dir = base_output / args.run_dir
+        else:
+            if not base_output.exists():
+                print("Error: generated_slides/ not found. Run generation first or pass --run-dir.", file=sys.stderr)
+                sys.exit(1)
+            candidates = list(base_output.rglob("slide_*_0.*"))
+            if not candidates:
+                print("Error: no slides found under generated_slides/. Run generation first or pass --run-dir.", file=sys.stderr)
+                sys.exit(1)
+            latest_file = max(candidates, key=lambda p: p.stat().st_mtime)
+            output_dir = latest_file.parent
+            print(f"No --run-dir provided. Using latest run directory: {output_dir}")
+
         if not output_dir.exists():
             print(f"Error: run directory not found: {output_dir}", file=sys.stderr)
             sys.exit(1)
 
         print("Starting batch enlargement...")
-        slide_pattern = str(output_dir / "slide_*_0.jpg")
+        slide_pattern = str(output_dir / "slide_*_0.*")
         files = glob.glob(slide_pattern)
 
         if args.slides:
             filtered_files = []
             for f in files:
-                match = re.search(r'slide_(\d+)_0.jpg', f)
+                match = re.search(r'slide_(\d+)_0\.', f)
                 if match:
                     num = int(match.group(1))
                     if num in args.slides:
@@ -373,9 +390,11 @@ def main():
     # Collect generated images in order and build artifacts
     slide_paths = []
     for slide in sorted(slides, key=lambda s: s.get("number", 0)):
-        img_path = output_dir / f"slide_{slide.get('number',0):02d}_0.jpg"
-        if img_path.exists():
-            slide_paths.append(img_path)
+        num = slide.get("number", 0)
+        pattern = f"slide_{num:02d}_0.*"
+        matches = list(output_dir.glob(pattern))
+        if matches:
+            slide_paths.append(sorted(matches)[0])
 
     if slide_paths:
         # Save PDF

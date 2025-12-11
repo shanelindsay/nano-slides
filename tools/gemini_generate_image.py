@@ -37,9 +37,9 @@ def generate(
     aspect_ratio: Optional[str] = None,
 ) -> None:
     """Send text (and optionally images) to Gemini 3 Pro Image Preview and stream responses."""
-    api_key = os.environ.get("GEMINI_API_KEY")
+    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     if not api_key:
-        print("Error: GEMINI_API_KEY environment variable not set", file=sys.stderr)
+        print("Error: GEMINI_API_KEY or GOOGLE_API_KEY environment variable not set", file=sys.stderr)
         sys.exit(1)
 
     client = genai.Client(api_key=api_key)

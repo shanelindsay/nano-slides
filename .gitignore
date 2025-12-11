@@ -44,10 +44,6 @@ Thumbs.db
 
 # Generated files
 generated_slides/
-*.jpg
-*.jpeg
-*.png
-*.webp
 
 # Database
 *.db

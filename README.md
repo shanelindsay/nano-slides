@@ -27,7 +27,7 @@ This project implements the **Generative Kernel** philosophy: instead of manuall
 ## Workflow (current fork)
 
 ### 1. Define the Context
-Edit an outline (default: `slides.yaml`, or pass `--yaml outlines/sample_talk_outline.md`). Preferred format is YAML documents separated by `---`:
+Edit an outline (default: `slides.yaml` in the repo root, or pass `--yaml outlines/sample_talk_outline.md`). Preferred format is YAML documents separated by `---`:
 
 ```
 ---
@@ -77,8 +77,8 @@ python tools/generate_slides.py --yaml slides.yaml --style glass_garden
 ```
 This parses the outline, calls the Gemini 3 Pro Image Preview API, and saves images to `generated_slides/`.
 
-By default it looks for `outlines/sample_slides.yaml`; you can point `--yaml` at any file. Each run writes to `generated_slides/<yaml-stem>/<timestamp>/` with:
-- `slide_XX_0.jpg` (1K drafts)
+By default it looks for `slides.yaml` in the repo root. If that does not exist, it falls back to `outlines/sample_slides.yaml`. You can point `--yaml` at any file. Each run writes to `generated_slides/<yaml-stem>/<timestamp>/` with:
+- `slide_XX_0.<ext>` (1K drafts)
 - `slides.pdf`
 - `index.html` (simple viewer for that run)
 
@@ -94,16 +94,24 @@ python tools/gemini_generate_image.py --prompt "<grid prompt>" --output imgs/sty
 ### 3. Refine & Upscale (Production Mode)
 Once specific slides are approved, upscale them to 4K resolution using the generative upscaler.
 ```bash
-# Upscale everything
+# Upscale every slide from the most recent run
 python tools/generate_slides.py --enlarge
 
-# Upscale specific slides
+# Upscale specific slides from the most recent run
 python tools/generate_slides.py --enlarge --slides 8 11
+
+# Upscale slides from a specific run directory under generated_slides/
+python tools/generate_slides.py --enlarge --run-dir slides/20250101_120000
 ```
 
 ### 4. Present
-Open `index.html`.
-The presentation uses **Reveal.js** to display the generated "Mega-Images" as full-screen backgrounds. It is simple, robust, and visually stunning.
+To review a generated deck, open the `index.html` inside the run directory, for example:
+
+`generated_slides/slides/20250101_120000/index.html`
+
+This is a simple viewer that lists each slide image in order.
+
+The root `index.html` in this repo is a Reveal.js talk about the project itself; it is not automatically updated for each generation run.
 
 ## Setup
 

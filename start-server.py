@@ -18,7 +18,7 @@ def start_server(port=8080):
     server.watch('*.css')
     server.watch('js/**/*.js')
     server.watch('js/**/*.json')
-    server.watch('images/**/*')
+    server.watch('generated_slides/**/*')
     server.watch('css/**/*.css')
     
     print(f"Server starting at http://localhost:{port}")
