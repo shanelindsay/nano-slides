@@ -76,13 +76,30 @@ Add your assets (e.g., `imgs/style_anchor_glass_garden_0.jpg` or `imgs/style_mat
 
 ## Style preview
 
-See `imgs/style_grid_reference_v3_0.jpg` for a 2x4 grid illustrating styles 
-(Cinematic Darkroom, Research Notebook, Playful Infographic, Minimal Grid, 
-Minimal Monochrome, Dark Terminal, Research Poster, Sticky Note Workshop).
+See `imgs/style_grid_reference_v4_0.jpg` for a 4x4 grid illustrating styles 
+(Clean Keynote, Modern Academic, Glass Garden, Chalkboard, Whiteboard Workshop, 
+Data Conference, Editorial Magazine, Minimal Monochrome, Dark Terminal, Research Poster, 
+Notebook Paper, Sticky Note Workshop, Systems Blueprint, Cinematic Darkroom, 
+Research Notebook, Playful Infographic).
 
 Sample reference slides (usable as style anchors):
 - Modern Academic: `imgs/style_ref_modern_academic_0.jpg`
 - Dark Terminal: `imgs/style_ref_dark_terminal_0.jpg`
+- Clean Keynote: `imgs/style_ref_clean_keynote_0.jpg`
+- Glass Garden: `imgs/style_anchor_glass_garden_0.jpg`
+- Chalkboard: `imgs/style_ref_chalkboard_0.jpg`
+- Whiteboard Workshop: `imgs/style_ref_whiteboard_workshop_0.jpg`
+- Data Conference: `imgs/style_ref_data_conference_0.jpg`
+- Editorial Magazine: `imgs/style_ref_editorial_magazine_0.jpg`
+- Minimal Monochrome: `imgs/style_ref_minimal_monochrome_0.jpg`
+- Research Poster: `imgs/style_ref_research_poster_0.jpg`
+- Notebook Paper: `imgs/style_ref_notebook_paper_0.jpg`
+- Sticky Note Workshop: `imgs/style_ref_sticky_note_workshop_0.jpg`
+- Systems Blueprint: `imgs/style_ref_systems_blueprint_0.jpg`
+- Cinematic Darkroom: `imgs/style_ref_cinematic_darkroom_0.jpg`
+- Research Notebook: `imgs/style_ref_research_notebook_0.jpg`
+- Playful Infographic: `imgs/style_ref_playful_infographic_0.jpg`
+- Minimal Grid: `imgs/style_ref_minimal_grid_0.jpg`
 
 ### 3. Refine & Upscale (Production Mode)
 Once specific slides are approved, upscale them to 4K resolution using the generative upscaler.
