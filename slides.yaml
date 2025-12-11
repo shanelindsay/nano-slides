@@ -2,7 +2,7 @@
 slide: 1
 type: title
 layout: title_slide
-style: modern_academic:title
+style: chalkboard:default
 generate: true
 
 title: Slide Decks from AI Images
@@ -16,8 +16,7 @@ visual: |
   title, subtitle underneath, and a small abstract graphic on the right that
   suggests slides or windows stacking. Nothing flashy, just tidy and readable.
 
-assets:
-  - imgs/style_matrix_modern_academic.jpg
+assets: []
 
 notes: |
   Open with the core idea: this repo takes structured slide descriptions and
@@ -26,7 +25,7 @@ notes: |
 slide: 2
 type: section
 layout: section_header
-style: modern_academic:default
+style: chalkboard:default
 generate: true
 
 title: What this repo is for
@@ -40,8 +39,7 @@ visual: |
   accent line underneath, and a faint abstract background shape. No charts
   or bullet points, just a clear section divider.
 
-assets:
-  - imgs/style_matrix_modern_academic.jpg
+assets: []
 
 notes: |
   Short transition slide to mark the "motivation / overview" part of the talk.
@@ -49,7 +47,7 @@ notes: |
 slide: 3
 type: content
 layout: title_and_content
-style: modern_academic:default
+style: chalkboard:default
 generate: true
 
 title: What this repo does
@@ -67,8 +65,7 @@ visual: |
   thumbnail grid of three or four slide previews, hinting at the generated
   images. Keep everything flat and minimal.
 
-assets:
-  - imgs/style_matrix_modern_academic.jpg
+assets: []
 
 notes: |
   Explain that the repo is an "outline + style in, slide images out" system,
@@ -77,7 +74,7 @@ notes: |
 slide: 4
 type: content
 layout: two_content
-style: modern_academic:default
+style: chalkboard:default
 generate: true
 
 title: Old vs new workflow
@@ -101,8 +98,7 @@ visual: |
   "New way". Light vertical guide separating the two. Small abstract icon or
   mini diagram above each column, but keep text as the main focus.
 
-assets:
-  - imgs/style_matrix_modern_academic.jpg
+assets: []
 
 notes: |
   Contrast manual deck-building against the generative approach, both in
@@ -111,7 +107,7 @@ notes: |
 slide: 5
 type: content
 layout: picture_with_caption
-style: modern_academic:default
+style: chalkboard:default
 generate: true
 
 title: How the pipeline works
@@ -130,8 +126,7 @@ visual: |
   "Rendered slides", shown as 3-4 miniature slide thumbnails.
   On the right is the text caption area with bullets.
 
-assets:
-  - imgs/style_matrix_modern_academic.jpg
+assets: []
 
 notes: |
   This slide is the conceptual architecture: inputs (style + outline),
@@ -141,7 +136,7 @@ notes: |
 slide: 6
 type: image_only
 layout: blank
-style: modern_academic:visual
+style: chalkboard:default
 generate: true
 
 title: Example rendered slide
@@ -155,8 +150,7 @@ visual: |
   a small chart or diagram, and a few neat labels. Avoid extra text overlays
   beyond what naturally belongs on the slide.
 
-assets:
-  - imgs/style_matrix_modern_academic.jpg
+assets: []
 
 notes: |
   This slide is meant to be almost entirely visual: a single strong example
