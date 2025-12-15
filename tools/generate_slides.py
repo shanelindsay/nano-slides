@@ -55,10 +55,11 @@ def find_style_reference(base_style: str, project_root: Path):
             return path
     return None
 
-def _format_text_block(text_field) -> str:
+def _format_text_block(text_field, mode: str = "balanced") -> str:
     """
     Normalize text content from YAML to a simple string block.
     Supports dict with heading/subtitle/body/bullets or plain string. Also supports columns.
+    The wording changes slightly depending on mode: in non-structured modes we talk about "ideas" rather than "bullets".
     """
     if text_field is None:
         return ""
@@ -67,36 +68,47 @@ def _format_text_block(text_field) -> str:
     if not isinstance(text_field, dict):
         return ""
 
+    structured = (mode == "structured")
+    bullet_label = "Bullets" if structured else "Key ideas"
+    bullet_prefix = "-" if structured else "•"
+
     # Columns support
     if "columns" in text_field:
         cols = text_field.get("columns") or []
-        lines = ["Two-column structure:"]
+        lines = ["Two-column structure:" if structured else "Two groups of key ideas (for example left and right regions on the slide):"]
         for idx, col in enumerate(cols, start=1):
             heading = col.get("heading") or col.get("title") or f"Column {idx}"
             bullets = col.get("bullets") or []
-            lines.append(f"Column {idx} heading: {heading}")
-            if bullets:
-                lines.append("  Bullets:")
-                for b in bullets:
-                    lines.append(f"  - {b}")
+            if structured:
+                lines.append(f"Column {idx} heading: {heading}")
+                if bullets:
+                    lines.append("  Bullets:")
+                    for b in bullets:
+                        lines.append(f"  - {b}")
+            else:
+                lines.append(f"Group {idx} label: {heading}")
+                if bullets:
+                    lines.append("  Key ideas:")
+                    for b in bullets:
+                        lines.append(f"  {bullet_prefix} {b}")
         return "\n".join(lines).strip()
 
     lines = []
     heading = text_field.get("heading") or text_field.get("subtitle") or text_field.get("title")
     if heading:
-        lines.append(f"Heading: {heading}")
+        lines.append(f"Heading: {heading}" if structured else f"Key idea label: {heading}")
     body = text_field.get("body")
     if body:
         lines.append(f"Body: {body}")
     bullets = text_field.get("bullets") or []
     if bullets:
-        lines.append("Bullets:")
+        lines.append(f"{bullet_label}:")
         for b in bullets:
-            lines.append(f"- {b}")
+            lines.append(f"{bullet_prefix} {b}")
     return "\n".join(lines).strip()
 
 
-def _parse_yaml_outline(outline_path, specific_slides=None):
+def _parse_yaml_outline(outline_path, specific_slides=None, mode: str = "balanced"):
     """
     Parse YAML-style outline: multi-doc separated by ---.
     """
@@ -140,7 +152,7 @@ def _parse_yaml_outline(outline_path, specific_slides=None):
         else:
             style_refs = []
 
-        text_block = _format_text_block(doc.get("text"))
+        text_block = _format_text_block(doc.get("text"), mode=mode)
 
         content_dump = yaml.safe_dump(doc, sort_keys=False)
 
@@ -163,8 +175,8 @@ def _parse_yaml_outline(outline_path, specific_slides=None):
     return slides
 
 
-def parse_slides(outline_path, start_slide=1, end_slide=None, specific_slides=None):
-    return _parse_yaml_outline(outline_path, specific_slides=specific_slides)
+def parse_slides(outline_path, start_slide=1, end_slide=None, specific_slides=None, mode: str = "balanced"):
+    return _parse_yaml_outline(outline_path, specific_slides=specific_slides, mode=mode)
 
 
 def _layout_hint(layout: str) -> str:
@@ -201,14 +213,20 @@ def _variant_hint(variant: str) -> str:
     return ""
 
 
-def generate_slide(slide, style_text, default_style_ref, output_dir, project_root):
+def generate_slide(slide, style_text, style_pack_name, output_dir, project_root, mode, global_style_refs):
     print(f"Starting generation for Slide {slide['number']}...")
 
-    slide_style = slide.get('style') or default_style_ref
-    if slide_style and ":" in slide_style:
-        base_style, variant = slide_style.split(":", 1)
-    else:
-        base_style, variant = slide_style, None
+    # Pack comes from CLI; slide-level style is treated as a variant only.
+    # Pack comes from CLI/deck; slide-level style is treated as a variant only.
+    raw_variant = slide.get('style')
+    variant = None
+    if raw_variant:
+        raw_variant = str(raw_variant)
+        if ":" in raw_variant:
+            # Backward compatibility: allow pack:variant but ignore the pack part.
+            _, variant = raw_variant.split(":", 1)
+        else:
+            variant = raw_variant
 
     slide_title = slide.get('title') or f"Slide {slide['number']}"
     layout = slide.get('layout', "full")
@@ -225,56 +243,101 @@ def generate_slide(slide, style_text, default_style_ref, output_dir, project_roo
     type_hint = type_hint_map.get(slide.get("type", "content"), "Standard content slide.")
 
     prompt_parts = [
-        "You are an expert presentation designer for a high-end tech keynote.",
+        "You render full 16:9 presentation slide images.",
+        "Render the slide in the same medium as the provided style reference; match its texture, palette, and typography. Do not introduce a different rendering style.",
         "",
-        f"SLIDE TITLE: {slide_title}",
-        f"SLIDE SUBTITLE: {slide.get('subtitle','')}",
-        "",
-        "GLOBAL VISUAL STYLE (must follow):",
+        "GLOBAL VISUAL STYLE (must follow for all slides in this deck):",
         style_text,
         "",
-        "SLIDE STYLE & LAYOUT:",
-        f"- Style pack: {base_style or 'default'}",
-        f"- Variant: {variant or 'default'}",
-        f"- Layout: {layout}",
-        f"- Layout hint: {layout_hint}",
-        f"- Variant hint: {variant_hint}",
-        f"- Role: {type_hint}",
+        "STYLE PACK:",
+        f"- Style pack: {style_pack_name}",
     ]
 
-    # Structured outline pieces (optional)
-    if slide.get("text"):
-        prompt_parts.append("\nSTRUCTURED TEXT (use verbatim for content cues):")
-        prompt_parts.append(slide["text"])
-    if slide.get("visual"):
-        prompt_parts.append("\nVISUAL IDEAS (directional, not verbatim text):")
-        prompt_parts.append(slide["visual"])
-    if slide.get("notes"):
-        prompt_parts.append("\nNOTES (speaker context; optional):")
-        prompt_parts.append(slide["notes"])
-    if slide.get("image_only"):
-        prompt_parts.append("\nIMAGE-ONLY: Minimize rendered text; focus on the visual.")
+    # Build list of style refs (explicit or global) and assets
+    style_refs = list(slide.get("style_refs") or global_style_refs or [])
 
-    prompt_parts.append("\nFULL SLIDE BLOCK (for reference):")
-    prompt_parts.append(slide['content'])
+    if style_refs:
+        prompt_parts.append("STYLE REFERENCES: Use these as visual anchors for color/typography/layout. Maintain consistency with them.")
+        prompt_parts.append(", ".join([Path(ref).name for ref in style_refs]))
+        prompt_parts.append("STRICT: Match the medium/texture of the reference (no photorealism if the reference is chalk/ink/flat). Redraw everything in that style and avoid introducing a different rendering style.")
+
+    if mode == "structured":
+        prompt_parts.append("\nGLOBAL TONE: Structured. Prioritise clear, literal layouts; if bullets are present, organise them cleanly. Avoid overly decorative visuals.")
+    elif mode == "expressive":
+        prompt_parts.append("\nGLOBAL TONE: Expressive. You may replace plain bullet lists with more visual structures (diagrams, labelled arrows, cards) so long as the information content is preserved.")
+    else:
+        prompt_parts.append("\nGLOBAL TONE: Balanced. Mix clear structure with some expressive visual design, without letting decoration overpower legibility.")
+
+    prompt_parts.extend(
+        [
+            "",
+            "SLIDE ROLE & LAYOUT:",
+            f"- Type: {type_hint}",
+            f"- Layout: {layout}",
+            f"- Layout hint: {layout_hint}",
+            f"- Variant: {variant or 'default'}",
+            f"- Variant hint: {variant_hint}",
+        ]
+    )
+
+    # Structured outline pieces (style-neutral)
+    text_block = slide.get("text")
+    text_lines = []
+    if text_block:
+        if mode == "structured":
+            text_lines.append(
+                "STRUCTURED TEXT (these bullets should appear clearly on-slide, usually as bullet lists or short labelled blocks):"
+            )
+        else:
+            text_lines.append(
+                "CONTENT IDEAS (preserve the meaning of these points; you may present them as diagrams, flows, or labelled regions rather than literal bullet lists):"
+            )
+        if slide_title:
+            text_lines.append(f"- Title: {slide_title}")
+        subtitle = slide.get("subtitle", "")
+        if subtitle:
+            text_lines.append(f"- Subtitle: {subtitle}")
+
+        # Render bullets or columns
+        if isinstance(text_block, dict) and text_block.get("columns"):
+            text_lines.append("- Columns:")
+            for idx, col in enumerate(text_block.get("columns"), start=1):
+                heading = col.get("heading") or f"Column {idx}"
+                text_lines.append(f"  - {heading}:")
+                for b in col.get("bullets", []):
+                    text_lines.append(f"    - {b}")
+        elif isinstance(text_block, dict) and text_block.get("bullets"):
+            text_lines.append("- Bullets:")
+            for b in text_block.get("bullets", []):
+                text_lines.append(f"  - {b}")
+        else:
+            text_lines.append(_format_text_block(text_block))
+
+    visual = slide.get("visual")
+    if visual:
+        text_lines.append("")
+        text_lines.append("VISUAL GUIDANCE (style-neutral; interpret via style pack):")
+        text_lines.append(visual)
+
+    notes = slide.get("notes")
+    if notes:
+        text_lines.append("")
+        text_lines.append("NOTES (speaker context; optional):")
+        text_lines.append(notes)
+
+    if slide.get("image_only"):
+        text_lines.append("")
+        text_lines.append("IMAGE-ONLY: Minimize rendered text; focus on the visual.")
+
+    if text_lines:
+        prompt_parts.append("")
+        prompt_parts.extend(text_lines)
 
     prompt_parts.append(
         "\nTASK:\nGenerate a high-resolution, 16:9 slide image that reflects the outline while strictly following the style and layout guidance above.\nIf reference assets are provided, incorporate them naturally into the design."
     )
 
     prompt = "\n".join(prompt_parts)
-
-    # Build list of style refs (explicit + auto) and assets
-    style_refs = list(slide.get("style_refs") or [])
-    auto_ref = find_style_reference(base_style, project_root)
-    if auto_ref:
-        auto_ref_str = str(auto_ref)
-        if auto_ref_str not in style_refs:
-            style_refs.append(auto_ref_str)
-
-    if style_refs:
-        prompt_parts.append("\nSTYLE REFERENCES: Use these as visual anchors for color/typography/layout. Maintain consistency with them.")
-        prompt_parts.append(", ".join([Path(ref).name for ref in style_refs]))
 
     image_inputs = []
     combined_inputs = []
@@ -316,23 +379,49 @@ def main():
     parser = argparse.ArgumentParser(description="Generate slides")
     parser.add_argument("--enlarge", action="store_true", help="Enlarge existing slides to 4K")
     parser.add_argument("--slides", type=int, nargs="+", help="Specific slide numbers to process (e.g., --slides 8 11)")
-    parser.add_argument("--yaml", type=str, default=None, help="Path to YAML slides file (default: slides.yaml, else fall back to outlines/sample_slides.yaml)")
-    parser.add_argument("--run-dir", type=str, default=None, help="Output subdirectory under generated_slides/ (for --enlarge).")
-    parser.add_argument("--style", type=str, default="glass_garden", help="Style name (styles/<name>.md) or path to style file")
+    parser.add_argument("--yaml", type=str, default=None, help="Path to YAML slides file (overrides deck.yaml if provided)")
+    parser.add_argument("--run-dir", type=str, default=None, help="Output subdirectory under generated_slides/ (required for --enlarge; ignored for generation).")
+    parser.add_argument(
+        "--style",
+        type=str,
+        default=None,
+        help="Optional override for deck.yaml style_pack. Style name (styles/<name>.md) or path to style file.",
+    )
+    parser.add_argument(
+        "--mode",
+        type=str,
+        default=None,
+        choices=["structured", "balanced", "expressive"],
+        help="Optional override for deck.yaml mode. Controls how literally bullets vs ideas are rendered.",
+    )
     args = parser.parse_args()
 
     script_dir = Path(__file__).parent
     project_root = script_dir.parent
 
-    # Prefer slides.yaml in repo root; fall back to sample if missing
-    root_yaml = project_root / "slides.yaml"
-    sample_yaml = project_root / "outlines" / "sample_slides.yaml"
+    # Prefer deck.yaml if present for defaults
+    deck_cfg_path = project_root / "deck.yaml"
+    deck_cfg = {}
+    if deck_cfg_path.exists():
+        try:
+            deck_cfg = yaml.safe_load(deck_cfg_path.read_text(encoding="utf-8")) or {}
+        except Exception as e:
+            print(f"Warning: failed to parse deck.yaml: {e}", file=sys.stderr)
+            deck_cfg = {}
+
+    # Resolve outline path: CLI > deck.yaml > root slides.yaml > sample
     if args.yaml:
         outline_path = Path(args.yaml)
-    elif root_yaml.exists():
-        outline_path = root_yaml
     else:
-        outline_path = sample_yaml
+        yaml_from_deck = deck_cfg.get("yaml")
+        if yaml_from_deck:
+            outline_path = Path(yaml_from_deck)
+            if not outline_path.is_absolute():
+                outline_path = project_root / yaml_from_deck
+        else:
+            root_yaml = project_root / "slides.yaml"
+            sample_yaml = project_root / "outlines" / "sample_slides.yaml"
+            outline_path = root_yaml if root_yaml.exists() else sample_yaml
     base_output = project_root / "generated_slides"
 
     if args.enlarge:
@@ -400,19 +489,45 @@ def main():
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    style_text = load_style(args.style, project_root)
+    # Resolve style pack and mode: CLI > deck.yaml > defaults
+    style_pack_name = args.style or deck_cfg.get("style_pack") or "glass_garden"
+    mode = args.mode or deck_cfg.get("mode") or "balanced"
+
+    style_text = load_style(style_pack_name, project_root)
+
+    # Derive base style name (for auto style refs) from CLI/deck style arg
+    style_path = Path(style_pack_name)
+    if style_path.is_file():
+        base_style_name = style_path.stem
+    else:
+        base_style_name = style_path.name
+
+    # Find a matching style reference image, if any
+    auto_style_refs = []
+    auto_ref = find_style_reference(base_style_name, project_root)
+    if auto_ref:
+        auto_style_refs.append(str(auto_ref))
 
     specific_slides = args.slides if args.slides else None
     if not specific_slides:
-        slides = parse_slides(str(outline_path))
+        slides = parse_slides(str(outline_path), mode=mode)
     else:
-        slides = parse_slides(str(outline_path), specific_slides=specific_slides)
+        slides = parse_slides(str(outline_path), specific_slides=specific_slides, mode=mode)
 
     print(f"Found {len(slides)} slides to generate.")
 
     with ThreadPoolExecutor(max_workers=4) as executor:
         futures = [
-            executor.submit(generate_slide, slide, style_text, args.style, output_dir, project_root)
+            executor.submit(
+                generate_slide,
+                slide,
+                style_text,
+                base_style_name,
+                output_dir,
+                project_root,
+                mode,
+                auto_style_refs,
+            )
             for slide in slides
         ]
         for future in futures:
