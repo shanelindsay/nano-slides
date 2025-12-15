@@ -1,38 +1,209 @@
 # Nano Banana Pro Slide Deck Generator (Fork)
 
 This fork is a controllable slide renderer:
-- You write the outline in Markdown.
+
+- You write the outline as YAML slides.
 - You pick a style pack from `styles/`.
-- You can add per-slide style/layout hints.
-- Gemini 3 Pro Image Preview renders the slides.
+- The tool composes prompts for Gemini 3 Pro Image Preview.
+- Each slide is rendered as a full image that you can view, export to PDF, or 
+wrap in PowerPoint.
 
-Original write-up for reference:
-*   [中文版 (Chinese)](https://yage.ai/nano-banana-pro.html)
-*   [English Version](https://yage.ai/nano-banana-pro-en.html)
+Original write‑up for background and style inspiration:
 
-## What’s different in this fork
-- Styles live in `styles/` (clean_keynote, modern_academic, chalkboard, whiteboard_workshop, data_conference, editorial_magazine, glass_garden); choose with `--style` or point to a custom file.
-- Outlines are YAML files (`slides.yaml` by default, or pass `--yaml`), with per-slide `type`, PowerPoint-like `layout`, `generate`, `title/subtitle`, `text` (bullets or columns), `visual`, `assets`, `style_ref`, `notes`, `image_only`. See `outlines/sample_talk_outline.md` or `slides.yaml`.
-- Prompts are composed from the style pack + layout/type hints + your outline text. No automatic summarization or planning.
+- [中文版 (Chinese)](https://yage.ai/nano-banana-pro.html)  
+- [English Version](https://yage.ai/nano-banana-pro-en.html)
 
+---
 
-## Workflow (current fork)
+## Approach in one paragraph
 
-### 1. Define the Context
-Edit an outline (default: `slides.yaml` in the repo root, or pass `--yaml outlines/sample_talk_outline.md`). Preferred format is YAML documents separated by `---`:
+Instead of building slides inside PowerPoint, you describe the talk as data:
 
+- **Outline**: `slides.yaml` holds the slide sequence and content.  
+- **Style**: a style pack in `styles/` describes the visual language.  
+- **Generator**: `tools/generate_slides.py` combines style text, style images 
+and your outline into prompts, and calls Gemini 3 Pro Image Preview.  
+
+The result is a folder of slide images, plus a PDF and a small HTML viewer.
+
+---
+
+## Pros and cons
+
+### Advantages
+
+- **Separation of concerns**  
+  Structure, content and visual style are defined separately and combined at 
+render time.
+
+- **Consistent visual identity**  
+  The model sees both the style description and an example style image so decks 
+tend to look coherent end to end.
+
+- **Style‑swappable decks**  
+  The same `slides.yaml` can be rendered in different styles just by changing 
+`--style`.
+
+### Limitations
+
+- **Images, not editable shapes**  
+  Output is raster images. You cannot edit text inside PowerPoint; links are not 
+clickable on the slide itself.
+
+- **Layout is a hint**  
+  `layout:` values are steering signals for the model, not strict layout 
+constraints.
+
+- **Model and cost dependent**  
+  Renders depend on Gemini’s behaviour and pricing, so long decks and many 
+iterations will consume API quota.
+
+---
+
+## What this fork adds
+
+Compared to the original Nano Banana Pro repo, this fork:
+
+- Uses **YAML slide blocks** (`slides.yaml` by default, or any file via 
+`--yaml`) rather than ad‑hoc markdown formats.
+- Provides multiple **style packs** in `styles/` (for example `modern_academic`, 
+`chalkboard`, `clean_keynote`, `glass_garden`).
+- Uses **style reference images** automatically when they are present for a 
+style.
+- Generates a **PDF** and a minimal **HTML viewer** for each run, in addition to 
+the per‑slide images.
+- Exposes standard flags for **draft generation**, **upscaling to 4K**, and 
+**optional PowerPoint export** (image‑only slides).
+
+---
+
+## Styles and style reference images
+
+Each style has:
+
+1. A **style file** in `styles/`, for example:
+
+   - `styles/modern_academic.md`
+   - `styles/chalkboard.md`
+   - `styles/notebook_paper.md`
+   - `styles/glass_garden.md`
+
+2. An optional **style reference image** that shows one example slide in that
+look, for example:
+
+   - `imgs/style_ref_modern_academic_0.jpg`
+   - `imgs/style_ref_chalkboard_0.jpg`
+   - `imgs/style_ref_notebook_paper_0.jpg`
+   - `imgs/style_anchor_glass_garden_0.jpg`
+
+When you run:
+
+```bash
+python tools/generate_slides.py --yaml slides.yaml --style modern_academic
 ```
+
+the generator:
+
+* Loads the text spec from `styles/modern_academic.md`.
+* If an image with a matching name exists in `imgs/` (for example a file
+starting `style_ref_modern_academic_`), uses it as a **global style anchor**.
+* Also passes any per‑slide `assets:` listed in the YAML (intended for semantic
+assets such as logos/QR codes).
+
+This means the model is guided by both the written description and a concrete
+visual example, which improves consistency across slides.
+
+You can also steer the overall tone with `--mode`:
+
+- `structured`: more literal, bullet-friendly layouts
+- `balanced`: (default) mix structure with some expressive visuals
+- `expressive`: more visual/metaphorical while preserving information
+
+For research-heavy decks, use `prompts/outline_generator_research.md` to generate a style-neutral outline with strict factual constraints.
+
+### Recommended workflow for a new style
+
+You can scaffold a new style automatically:
+
+```bash
+python tools/make_style.py \
+  --name minimal_grid \
+  --description "Very clean research-talk style, thin grid, off-white background, mono accent colour."
+```
+
+This creates `styles/minimal_grid.md` and a matching `imgs/style_ref_minimal_grid_0.*` anchor.
+
+1. **Create a style file**
+   Copy an existing file, for example:
+
+   ```bash
+   cp styles/modern_academic.md styles/my_style.md
+   ```
+
+   Edit the colours, typography and layout guidance so it describes your new 
+style.
+
+2. **Generate an example slide image**
+   Use `tools/gemini_generate_image.py` to render one example slide in that 
+style and save it under `imgs/` with a matching name, for example:
+
+   ```bash
+   python tools/gemini_generate_image.py \
+     --prompt "One example presentation slide in the 'My Style' visual language 
+described in styles/my_style.md" \
+     --output imgs/style_ref_my_style \
+     --size 1K --aspect-ratio 16:9
+   ```
+
+3. **Use it in your outline**
+   Keep the outline style‑neutral. Render with:
+
+   ```bash
+   python tools/generate_slides.py --yaml slides.yaml --style my_style
+   ```
+
+The generator will automatically pick up both the style text and the matching
+style reference image if present.
+
+---
+
+## Basic usage
+
+### 1. Write an outline
+
+Default outline file is `slides.yaml` in the repo root.
+You can also point at any YAML file with `--yaml`.
+
+### 1a. Deck defaults (optional)
+
+Set repo-wide defaults in `deck.yaml`:
+
+```yaml
+style_pack: modern_academic      # style name or path under styles/
+mode: balanced                   # structured | balanced | expressive
+yaml: slides.yaml                # default outline file
+```
+
+CLI flags override these values.
+
+Outlines are **style neutral**. Choose the style with `--style`; per-slide
+`style` is treated only as a variant (e.g. `title`, `visual`). YAML format is
+`---` separated slide documents, for example:
+
+```yaml
 ---
 slide: 2                          # explicit number
-type: content                     # title | section | content | image_only | transition
-style: glass_garden:default       # base style + optional variant
-layout: two_content               # title_slide | title_and_content | two_content | comparison | picture_with_caption | section_header | blank
+type: content                     # title | section | content | image_only | 
+transition
+style: title                      # optional variant (e.g. title | visual)
+layout: two_content               # title_slide | title_and_content |
+two_content | comparison | picture_with_caption | section_header | blank
 generate: true                    # optional; defaults to true
 
-title: Background problem         # on-slide title
-subtitle: The old world           # optional
+title: Background problem
+subtitle: The old world
 
-text:                             # optional; omit for image-only
+text:                             # optional; omit for image‑only
   columns:
     - heading: Old
       bullets:
@@ -46,85 +217,85 @@ text:                             # optional; omit for image-only
         - Faster iteration
 
 visual: |
-  Two-column composition: left shows fragmented assets; right shows a cohesive rendered scene.
-  Emphasize contrast: chaos -> order.
+  Two‑column composition: left shows fragmented assets; right shows a cohesive
+  rendered scene. Keep it style neutral; the style pack will define the medium.
 
 assets:
-  - imgs/style_anchor_glass_garden_0.jpg    # optional style anchor image
-
-style_ref:
-  - generated_slides/slide_01_0.jpg   # optional: reference images to enforce style consistency
+  - imgs/logo.png                # optional per‑slide semantic asset (logo/QR)
 
 notes: Optional speaker notes
-image_only: false                    # optional; set true to minimize rendered text
+image_only: false
 ---
 ```
 
-### 2. Generate (Draft Mode)
-Run the generator to create 1K previews. This is fast and cheap for iteration.
+### Demos
+
+- `demo/chalkboard/`: example run of the neutral outline rendered with `--style chalkboard` (images, PDF, PPTX, index).
+- `demo/notebook_paper/`: example run of the same outline rendered with `--style notebook_paper` (images, PDF, PPTX, index).
+
+Then render with a style pack, for example:
+
 ```bash
-python tools/generate_slides.py --yaml slides.yaml --style glass_garden
+# Chalkboard look
+python tools/generate_slides.py --yaml slides.yaml --style chalkboard --mode balanced
+
+# Notebook paper look
+python tools/generate_slides.py --yaml slides.yaml --style notebook_paper --mode structured
 ```
-This parses the outline, calls the Gemini 3 Pro Image Preview API, and saves images to `generated_slides/`.
 
-By default it looks for `slides.yaml` in the repo root. If that does not exist, it falls back to `outlines/sample_slides.yaml`. You can point `--yaml` at any file. Each run writes to `generated_slides/<yaml-stem>/<timestamp>/` with:
-- `slide_XX_0.<ext>` (1K drafts)
-- `slides.pdf`
-- `index.html` (simple viewer for that run)
+If `slides.yaml` is missing, the tool falls back to 
+`outlines/sample_slides.yaml`.
 
-Add your assets (e.g., `imgs/style_anchor_glass_garden_0.jpg` or `imgs/style_matrix_modern_academic_0.jpg`) if you want style anchoring; missing assets are skipped with a warning.
+### 2. Generate draft slides
 
-## Style preview
+Create 1K draft images for quick iteration:
 
-See `imgs/style_grid_reference_v4_0.jpg` for a 4x4 grid illustrating styles 
-(Clean Keynote, Modern Academic, Glass Garden, Chalkboard, Whiteboard Workshop, 
-Data Conference, Editorial Magazine, Minimal Monochrome, Dark Terminal, Research Poster, 
-Notebook Paper, Sticky Note Workshop, Systems Blueprint, Cinematic Darkroom, 
-Research Notebook, Playful Infographic).
-
-Sample reference slides (usable as style anchors):
-- Modern Academic: `imgs/style_ref_modern_academic_0.jpg`
-- Dark Terminal: `imgs/style_ref_dark_terminal_0.jpg`
-- Clean Keynote: `imgs/style_ref_clean_keynote_0.jpg`
-- Glass Garden: `imgs/style_anchor_glass_garden_0.jpg`
-- Chalkboard: `imgs/style_ref_chalkboard_0.jpg`
-- Whiteboard Workshop: `imgs/style_ref_whiteboard_workshop_0.jpg`
-- Data Conference: `imgs/style_ref_data_conference_0.jpg`
-- Editorial Magazine: `imgs/style_ref_editorial_magazine_0.jpg`
-- Minimal Monochrome: `imgs/style_ref_minimal_monochrome_0.jpg`
-- Research Poster: `imgs/style_ref_research_poster_0.jpg`
-- Notebook Paper: `imgs/style_ref_notebook_paper_0.jpg`
-- Sticky Note Workshop: `imgs/style_ref_sticky_note_workshop_0.jpg`
-- Systems Blueprint: `imgs/style_ref_systems_blueprint_0.jpg`
-- Cinematic Darkroom: `imgs/style_ref_cinematic_darkroom_0.jpg`
-- Research Notebook: `imgs/style_ref_research_notebook_0.jpg`
-- Playful Infographic: `imgs/style_ref_playful_infographic_0.jpg`
-- Minimal Grid: `imgs/style_ref_minimal_grid_0.jpg`
-
-### 3. Refine & Upscale (Production Mode)
-Once specific slides are approved, upscale them to 4K resolution using the generative upscaler.
 ```bash
-# Upscale every slide from the most recent run
+python tools/generate_slides.py --yaml slides.yaml --style glass_garden --mode balanced
+```
+
+This writes a new run under:
+
+```text
+generated_slides/<yaml-stem>/<timestamp>/
+```
+
+Each run directory contains:
+
+* `slide_XX_0.<ext>` – draft slide images
+* `slides.pdf` – combined PDF version
+* `index.html` – simple viewer that shows all slides in order
+
+You can limit to specific slides with:
+
+```bash
+python tools/generate_slides.py --yaml slides.yaml --style glass_garden --slides 
+2 4 5
+```
+
+### 3. Upscale to 4K (optional)
+
+Once you are happy with some drafts, upscale those images:
+
+```bash
+# Upscale all slides from the most recent run
 python tools/generate_slides.py --enlarge
 
 # Upscale specific slides from the most recent run
 python tools/generate_slides.py --enlarge --slides 8 11
 
-# Upscale slides from a specific run directory under generated_slides/
+# Upscale slides from a specific run directory
 python tools/generate_slides.py --enlarge --run-dir slides/20250101_120000
 ```
 
-### 4. Present
-To review a generated deck, open the `index.html` inside the run directory, for example:
+---
 
-`generated_slides/slides/20250101_120000/index.html`
+## Export to PowerPoint (image‑only)
 
-This is a simple viewer that lists each slide image in order. A chalkboard demo run is mirrored in `demo/chalkboard/` for reference.
+If you have a script such as `tools/export_pptx.py`, you can wrap a run’s images 
+into a PPTX where each image is a full‑screen slide and notes come from the 
+YAML:
 
-The root `index.html` in this repo is a Reveal.js talk about the project itself; it is not automatically updated for each generation run.
-
-## Export to PowerPoint (image-only)
-Wrap a run’s images into a PPTX (each image is a full-screen slide; notes come from your YAML).
 ```bash
 # 1) Generate slides as images
 python tools/generate_slides.py --yaml slides.yaml --style modern_academic
@@ -132,7 +303,7 @@ python tools/generate_slides.py --yaml slides.yaml --style modern_academic
 # 2) Upscale if you want 4K (optional)
 python tools/generate_slides.py --enlarge --run-dir slides/20250101_120000
 
-# 3) Export to PPTX (uses run images; attaches notes from YAML if provided)
+# 3) Export to PPTX (image‑only slides)
 python tools/export_pptx.py \
   --run-dir generated_slides/slides/20250101_120000 \
   --yaml slides.yaml \
@@ -140,30 +311,42 @@ python tools/export_pptx.py \
   --output pptx/slides_modern_academic.pptx
 ```
 
+If you do not need PowerPoint, you can present directly from the generated PDF 
+or from the HTML viewer in the run directory.
+
+---
+
 ## Setup
 
-1.  **Environment**:
-    ```bash
-    uv venv  # using uv is recommended
-    source .venv/bin/activate
-    pip install -r requirements.txt
-    ```
-2.  **Credentials**:
-    Create a `.env` file with your API key:
-    ```
-    GOOGLE_API_KEY=your_key_here
-    ```
+1. **Environment**
 
-## Project Structure
+   ```bash
+   uv venv  # any virtualenv tool is fine
+   source .venv/bin/activate
+   pip install -r requirements.txt
+   ```
 
-*   `outlines/`: Outline files (sample: `outlines/sample_talk_outline.md`).
-*   `styles/`: Style packs (clean_keynote, modern_academic, chalkboard, whiteboard_workshop, data_conference, editorial_magazine, glass_garden, minimal_monochrome, dark_terminal, research_poster, notebook_paper, sticky_note_workshop, systems_blueprint, cinematic_darkroom, research_notebook, playful_infographic, minimal_grid).
-*   `prompts/outline_generator.md`: Prompt for an LLM to emit outlines in the YAML format.
-*   `AGENTS.md`: Quick guide for agents using this repo.
-*   `speak_notes.md`: The script for the presentation.
-*   `tools/`: Python scripts for generation and upscaling.
-    *   `generate_slides.py`: Main orchestrator.
-    *   `gemini_generate_image.py`: API wrapper for generation.
-    *   `gemini_enlarge_image.py`: API wrapper for upscaling.
-*   `generated_slides/`: The render targets.
-*   `index.html`: The viewer.
+2. **Credentials**
+
+   Create a `.env` file with your API key:
+
+   ```text
+   GOOGLE_API_KEY=your_key_here
+   ```
+
+---
+
+## Project layout
+
+* `slides.yaml` – default outline file.
+* `outlines/` – extra outline examples, for example 
+`outlines/sample_talk_outline.md`.
+* `styles/` – style packs (markdown descriptions).
+* `imgs/` – style reference images and other assets.
+* `prompts/outline_generator.md` – prompt for asking an LLM to generate YAML 
+outlines.
+* `AGENTS.md` – quick guide for agents using this repo.
+* `speak_notes.md` – speaker notes for the demo talk.
+* `tools/` – generation and upscaling scripts.
+* `generated_slides/` – output from each run.
+* `index.html` – Reveal.js talk about the project itself (not updated per run).
