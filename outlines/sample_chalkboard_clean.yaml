@@ -1,0 +1,119 @@
+---
+slide: 1
+type: title
+layout: title_slide
+generate: true
+
+title: Building Slide Decks with AI Images
+subtitle: Outline-driven generation
+
+text:
+  bullets: []
+
+visual: |
+  Title near the top, simple supporting sketch on the right showing a stack of slides turning into a single framed slide. Leave generous negative space.
+
+notes: |
+  Intro to the idea: you describe slides in YAML, pick a style, and render full images.
+---
+slide: 2
+type: section
+layout: section_header
+generate: true
+
+title: How it works
+subtitle: From outline to rendered slides
+
+text:
+  bullets: []
+
+visual: |
+  Section divider with the title and a thin underline. Keep the background calm so the title stands out.
+
+notes: |
+  Transition into the mechanics of the pipeline.
+---
+slide: 3
+type: content
+layout: title_and_content
+generate: true
+
+title: Outline, style, engine
+subtitle: Three inputs
+
+text:
+  bullets:
+    - Outline: YAML with titles, bullets, layout hints
+    - Style: style pack plus a reference image
+    - Engine: Python tool that builds prompts and calls the image model
+    - Output: a folder of ready-to-present slide images
+
+visual: |
+  Simple diagram with three labeled cards feeding into one output card. Keep shapes clean and easy to read.
+
+notes: |
+  The deck is driven by structured outline + style, not by guessing from arbitrary docs.
+---
+slide: 4
+type: content
+layout: two_content
+generate: true
+
+title: Manual vs generated
+subtitle: Why bother?
+
+text:
+  columns:
+    - heading: Manual decks
+      bullets:
+        - Assemble slides one by one
+        - Search for icons and align boxes
+        - Visual style drifts over time
+    - heading: Generated decks
+      bullets:
+        - Describe each slide once in YAML
+        - Reuse the same style pack
+        - Batch render consistent images
+
+visual: |
+  Two-column composition. Left side: scattered pieces hinting at manual assembly. Right side: tidy set of slide thumbnails emerging from a single pipeline.
+
+notes: |
+  Contrast effort and consistency between hand-made slides and rendered slides.
+---
+slide: 5
+type: content
+layout: picture_with_caption
+generate: true
+
+title: Pipeline overview
+subtitle: Inputs to outputs
+
+text:
+  bullets:
+    - Inputs: style file and reference image
+    - Outline: slides.yaml with titles, text, layout, and assets
+    - Engine: generate_slides.py builds prompts per slide
+    - Outputs: images, per-run index, optional PDF
+
+visual: |
+  Left side: simple flow with three boxes labeled Style, Outline, Engine leading to a group of slide images. Right side reserved for the text bullets.
+
+notes: |
+  Keep the diagram minimal so the text remains readable.
+---
+slide: 6
+type: image_only
+layout: blank
+generate: true
+
+title: Example rendered slide
+subtitle: Visual-only demo
+
+text: {}
+
+visual: |
+  A sample slide scene with a clear title area and a small chart or diagram. Avoid extra body text; the goal is to show a finished slide image.
+
+notes: |
+  Use this as a visual proof of what the generator produces.

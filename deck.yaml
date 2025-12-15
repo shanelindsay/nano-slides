@@ -1,0 +1,4 @@
+# Defaults for a deck; CLI flags override these.
+style_pack: modern_academic      # style pack name or path, e.g., styles/modern_academic.md
+mode: balanced                   # structured | balanced | expressive
+yaml: slides.yaml                # outline file (relative to repo root)

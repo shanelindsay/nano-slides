@@ -2,7 +2,6 @@
 slide: 1
 type: title
 layout: title_slide
-style: chalkboard:default
 generate: true
 
 title: Slide Decks from AI Images
@@ -12,20 +11,15 @@ text:
   bullets: []
 
 visual: |
-  Clean modern academic title slide. Light grey background, large left-aligned
-  title, subtitle underneath, and a small abstract graphic on the right that
-  suggests slides or windows stacking. Nothing flashy, just tidy and readable.
-
-assets: []
+  Title near the top-left, subtitle beneath. Simple sketch on the right showing
+  a stack of slides turning into a single framed slide. Leave generous empty space.
 
 notes: |
-  Open with the core idea: this repo takes structured slide descriptions and
-  uses Gemini to render full slide images in a consistent visual style.
+  Outline + style → rendered slide images.
 ---
 slide: 2
 type: section
 layout: section_header
-style: chalkboard:default
 generate: true
 
 title: What this repo is for
@@ -35,19 +29,15 @@ text:
   bullets: []
 
 visual: |
-  Simple section header slide. Large title in the centre-left, a thin blue
-  accent line underneath, and a faint abstract background shape. No charts
-  or bullet points, just a clear section divider.
-
-assets: []
+  Section divider: large title near the upper left with a hand-drawn-style underline.
+  Plenty of empty space; no charts or bullets.
 
 notes: |
-  Short transition slide to mark the "motivation / overview" part of the talk.
+  Transition into the motivation/overview.
 ---
 slide: 3
 type: content
 layout: title_and_content
-style: chalkboard:default
 generate: true
 
 title: What this repo does
@@ -61,20 +51,15 @@ text:
     - The result is a folder of ready-to-present slide images
 
 visual: |
-  Title at the top, single content block beneath. On the right side, a small
-  thumbnail grid of three or four slide previews, hinting at the generated
-  images. Keep everything flat and minimal.
-
-assets: []
+  Title at the top, single content block beneath. On the right, a small grid of
+  3–4 slide thumbnails hinting at generated images.
 
 notes: |
-  Explain that the repo is an "outline + style in, slide images out" system,
-  not an automatic summariser of random PDFs.
+  Outline + style in, slide images out; not a PDF summariser.
 ---
 slide: 4
 type: content
 layout: two_content
-style: chalkboard:default
 generate: true
 
 title: Old vs new workflow
@@ -94,20 +79,16 @@ text:
         - Batch render consistent slide images with one command
 
 visual: |
-  Clear two-column composition: left column titled "Old way", right column
-  "New way". Light vertical guide separating the two. Small abstract icon or
-  mini diagram above each column, but keep text as the main focus.
-
-assets: []
+  Two-column composition. Left: scattered pieces hinting at manual assembly.
+  Right: tidy set of slide thumbnails emerging from a single pipeline. Light
+  divider between columns.
 
 notes: |
-  Contrast manual deck-building against the generative approach, both in
-  effort and in visual consistency.
+  Contrast effort and consistency.
 ---
 slide: 5
 type: content
 layout: picture_with_caption
-style: chalkboard:default
 generate: true
 
 title: How the pipeline works
@@ -115,28 +96,21 @@ subtitle: Style, outline, engine
 
 text:
   bullets:
-    - Style: a style file (e.g. modern_academic) and a reference image
-    - Outline: slides.yaml with titles, text, layout and assets
-    - Engine: Python tools that call Gemini to render each slide
+    - Inputs: style file and reference image
+    - Outline: slides.yaml with titles, text, layout, assets
+    - Engine: generate_slides.py builds prompts per slide
     - Output: generated_slides/ images + HTML viewer
 
 visual: |
-  Large schematic diagram on the left: three labelled boxes in a row:
-  "Style", "Outline (YAML)", "Engine". An arrow flows into a block labelled
-  "Rendered slides", shown as 3-4 miniature slide thumbnails.
-  On the right is the text caption area with bullets.
-
-assets: []
+  Left: simple flow with three boxes labeled Style, Outline (YAML), Engine leading
+  to a group of slide images. Right side reserved for the bullets.
 
 notes: |
-  This slide is the conceptual architecture: inputs (style + outline),
-  processing (tools/generate_slides.py, gemini_generate_image.py), and
-  outputs (images + index.html).
+  Inputs → processing → outputs.
 ---
 slide: 6
 type: image_only
 layout: blank
-style: chalkboard:default
 generate: true
 
 title: Example rendered slide
@@ -145,43 +119,9 @@ subtitle: (image-only demo)
 text: {}
 
 visual: |
-  Full-screen example slide in the modern academic style that could plausibly
-  be one of the outputs from this repo. Light background, clear title,
-  a small chart or diagram, and a few neat labels. Avoid extra text overlays
-  beyond what naturally belongs on the slide.
-
-assets: []
+  A sample slide scene with a clear title area and a small chart or diagram.
+  Avoid extra body text; focus on showing a finished slide image.
 
 notes: |
-  This slide is meant to be almost entirely visual: a single strong example
-  of what the model will generate for you. The title and subtitle can be
-  present as part of the image.
----
-slide: 7
-type: content
-layout: title_and_content
-style: chalkboard:default
-generate: true
-
-title: "Alternative style: Chalkboard"
-subtitle: Same repo, different look
-
-text:
-  bullets:
-    - Swap style: use chalkboard instead of modern_academic
-    - Keep the same slides.yaml structure and content
-    - Get a completely different visual feel automatically
-    - Useful for teaching, workshops, or informal talks
-
-visual: |
-  Chalkboard-style slide: dark green/charcoal board, white chalk title at
-  the top, a few chalk bullets, and a simple chalk sketch (e.g. a slide
-  icon or a small flow diagram). Make sure text is clear and legible.
-
-assets: []
-
-notes: |
-  Show that styles are pluggable: the same pipeline and slide YAML can render
-  into very different visual treatments by changing the style file and style
-  code on each slide.
+  Visual proof of what the generator produces.
 ---
