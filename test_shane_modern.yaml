@@ -1,0 +1,122 @@
+---
+slide: 1
+type: title
+layout: title_slide
+style: shane_modern:title
+generate: true
+
+title: Lexical access & the mental lexicon
+subtitle: How do we recognise words?
+
+text:
+  bullets: []
+
+visual: |
+  Title slide with deep navy header band at top containing white title text.
+  Subtitle below in lighter text. Optional: simple image of someone reading
+  on the right side. Clean, minimal, high contrast.
+
+notes: |
+  Today is a puzzle: reading feels effortless—but your brain is doing rapid
+  pattern recognition and decision-making. We'll focus on what we can measure,
+  the reliable patterns, and a few simple model "stories" that explain them.
+---
+slide: 2
+type: content
+layout: picture_with_caption
+style: shane_modern:default
+generate: true
+
+title: The everyday mystery
+
+text:
+  bullets:
+    - "You can read this instantly: **TABLE**"
+    - "But this feels odd: **TABEL**"
+    - "And this…? **FLIRP**"
+    - "What changes the 'instant-ness'?"
+
+visual: |
+  Left: teal title at top, charcoal bullets below in large text.
+  Right: image of scrabble tiles or letter tiles.
+  Clean split layout, high contrast.
+
+notes: |
+  Same letters, different experience. Some strings pop into place; others wobble.
+  We'll turn that feeling into measurable data.
+---
+slide: 3
+type: content
+layout: title_and_content
+style: shane_modern:default
+generate: true
+
+title: By the end of today, you can…
+
+text:
+  bullets:
+    - Measure word recognition with two tasks (lexical decision, naming)
+    - Interpret RT + accuracy (and their limits)
+    - Describe 3 reliable effects: frequency, length, similarity/neighbourhood
+    - Explain priming (incl. masked priming) and what it tests
+    - Understand morphological decomposition logic (TEACHER → TEACH)
+    - Compare localist vs distributed model 'stories'
+
+visual: |
+  White background, teal title at top, large charcoal bullets below.
+  Clean, accessible, generous whitespace. No heavy imagery.
+
+notes: |
+  No jargon quiz. We'll learn terms by using them repeatedly with examples.
+---
+slide: 4
+type: content
+layout: title_and_content
+style: shane_modern:default
+generate: true
+
+title: Tiny glossary (we'll reuse these all lecture)
+
+text:
+  bullets:
+    - "**Mental lexicon**: your internal 'word store'"
+    - "**Lexical access**: getting from print/sound to the right word entry"
+    - "**RT (reaction time)**: how long a response takes"
+    - "**Priming**: one stimulus changes response to the next"
+    - "**Morphology**: meaningful word parts (teach+er)"
+    - "**Frequency**: how common a word is"
+    - "**Neighbourhood/similarity**: how many 'lookalikes' a word has"
+    - "**Model**: an explanation that predicts data patterns"
+
+visual: |
+  Clean table layout with teal header, charcoal text. High contrast.
+  Terms in bold, definitions in regular weight.
+  Minimal design, easy to read.
+
+notes: |
+  If you remember nothing else: we never see lexical access directly—we infer it
+  from behaviour.
+---
+slide: 5
+type: content
+layout: title_and_content
+style: shane_modern:default
+generate: true
+
+title: Live demo - Word or not? (instructions)
+
+text:
+  bullets:
+    - I'll show letter strings one-by-one
+    - "Thumbs 👍 = WORD / Thumbs 👎 = NONWORD"
+    - Go with your first instinct
+
+visual: |
+  Cyan banner across top with white bold text: "Activity"
+  White body area below with large charcoal text showing the instructions.
+  Minimal, clear, high contrast.
+
+notes: |
+  This is basically a simplified version of a classic lab task you'll meet in a minute.
+---
+
